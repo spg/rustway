@@ -13,8 +13,24 @@ unsafe fn get_dimensions() -> winsize {
     window
 }
 
+fn clear_term() {
+    print!("\x1B[2J")
+}
+
+fn move_cursor_to_top() {
+    print!("\x1B[1;1H")
+}
+
+fn draw_grid() {
+    print!("*****")
+}
+
 fn main() {
     let w = unsafe { get_dimensions() };
-    println!("{}", w.ws_col);
-    println!("{}", w.ws_row);
+
+    loop {
+        clear_term();
+        move_cursor_to_top();
+        draw_grid()
+    }
 }
