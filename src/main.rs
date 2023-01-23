@@ -1,32 +1,7 @@
-use libc::{c_int, c_ulong, winsize, STDOUT_FILENO};
-use std::{
-    io::{self, Write},
-    mem::zeroed,
-};
+use std::io::{self, Write};
 
-extern "C" {
-    fn ioctl(fd: c_int, request: c_ulong, ...);
-}
-
-const TIOCGWINSZ: c_ulong = 0x40087468;
-
-unsafe fn get_dimensions() -> winsize {
-    let window: winsize = zeroed();
-    unsafe { ioctl(STDOUT_FILENO, TIOCGWINSZ, &window) };
-    window
-}
-
-// fn clear_term() {
-//     print!("\x1B[2J")
-// }
-
-fn move_cursor_to_top() {
-    print!("\x1B[1;1H")
-}
-
-// fn draw_grid() {
-//     print!("*****")
-// }
+mod file;
+mod term;
 
 fn print_state(state: &Vec<Vec<i32>>) {
     for row in state {
@@ -35,7 +10,6 @@ fn print_state(state: &Vec<Vec<i32>>) {
             let c = if cell.clone() > 0 { "*" } else { " " };
             print!("{}", c);
         }
-        // print!("\r\n")
     }
 }
 
@@ -97,7 +71,7 @@ fn turn(state: &mut Vec<Vec<i32>>) {
 }
 
 fn main() {
-    let w = unsafe { get_dimensions() };
+    let w = unsafe { term::get_dimensions() };
     let w_cells = w.ws_col as i32;
     let h_cells = w.ws_row as i32;
 
@@ -133,11 +107,7 @@ fn main() {
     state[49][72] = 1;
 
     loop {
-        // clear_term();
-        move_cursor_to_top();
-        // print!("\x1B[?25l");
-        // draw_grid()
-        // print!("a\r");
+        term::move_cursor_to_top();
         turn(&mut state);
         print_state(&state);
         io::stdout().flush().unwrap();
