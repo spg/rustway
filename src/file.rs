@@ -1,4 +1,4 @@
-use std::{error::Error, fs, path::Path};
+use std::{cmp::min, error::Error, fs, path::Path};
 
 #[cfg(test)]
 mod tests {
@@ -7,13 +7,13 @@ mod tests {
     use crate::file::get_initial_state;
 
     #[test]
-    fn testfile1() {
+    fn testfile1_1() {
         let cd = std::env::current_dir().expect("could not get current dir");
         let binding = cd.as_path().join(path::Path::new("testfile1.txt"));
 
         let testfile = &binding;
 
-        let result = get_initial_state(testfile).expect("could not get result");
+        let result = get_initial_state(testfile, 2, 3).expect("could not get result");
         assert_eq!(result.len(), 2);
         assert_eq!(result[0].len(), 3);
         assert_eq!(result[1].len(), 3);
@@ -28,13 +28,66 @@ mod tests {
     }
 
     #[test]
+    fn testfile1_2() {
+        let cd = std::env::current_dir().expect("could not get current dir");
+        let binding = cd.as_path().join(path::Path::new("testfile1.txt"));
+
+        let testfile = &binding;
+
+        let result = get_initial_state(testfile, 5, 5).expect("could not get result");
+        assert_eq!(result.len(), 5);
+        for row in &result {
+            assert_eq!(row.len(), 5)
+        }
+
+        assert_eq!(result[0][0], true);
+        assert_eq!(result[0][1], false);
+        assert_eq!(result[0][2], true);
+        assert_eq!(result[0][3], false);
+        assert_eq!(result[0][4], false);
+
+        assert_eq!(result[1][0], false);
+        assert_eq!(result[1][1], true);
+        assert_eq!(result[1][2], false);
+        assert_eq!(result[1][3], false);
+        assert_eq!(result[1][4], false);
+
+        // all the rest is false
+        for i in 2..5 {
+            for j in 0..5 {
+                assert_eq!(result[i][j], false)
+            }
+        }
+    }
+
+    #[test]
+    fn testfile1_3() {
+        let cd = std::env::current_dir().expect("could not get current dir");
+        let binding = cd.as_path().join(path::Path::new("testfile1.txt"));
+
+        let testfile = &binding;
+
+        let result = get_initial_state(testfile, 2, 2).expect("could not get result");
+        assert_eq!(result.len(), 2);
+        for row in &result {
+            assert_eq!(row.len(), 2)
+        }
+
+        assert_eq!(result[0][0], true);
+        assert_eq!(result[0][1], false);
+
+        assert_eq!(result[1][0], false);
+        assert_eq!(result[1][1], true);
+    }
+
+    #[test]
     fn testfile2() {
         let cd = std::env::current_dir().expect("could not get current dir");
         let binding = cd.as_path().join(path::Path::new("testfile2.txt"));
 
         let testfile = &binding;
 
-        let result = get_initial_state(testfile).expect("could not get result");
+        let result = get_initial_state(testfile, 4, 7).expect("could not get result");
         assert_eq!(result.len(), 4);
         assert_eq!(result[0].len(), 7);
         assert_eq!(result[1].len(), 7);
@@ -85,38 +138,39 @@ fn get_file_contents(path: &Path) -> Result<String, Box<dyn Error>> {
     Ok(contents)
 }
 
-pub fn get_initial_state(path: &Path) -> Result<Vec<Vec<bool>>, Box<dyn Error>> {
-    let mut max_width = 0;
+pub fn get_initial_state(
+    path: &Path,
+    n_rows: usize,
+    n_cols: usize,
+) -> Result<Vec<Vec<bool>>, Box<dyn Error>> {
     let contents = get_file_contents(path)?;
-
-    for line in contents.lines() {
-        let cur_len = line.len();
-        if cur_len > max_width {
-            max_width = cur_len;
-        }
-    }
-
-    let max_height = contents.lines().count();
-
     let mut res = Vec::new();
 
     let lines: Vec<&str> = contents.lines().collect();
-    for i in 0..max_height {
+    for i in 0..n_rows {
         let mut row = Vec::new();
-        let line = lines[i];
-        let line_length = line.len();
+        if i < lines.len() {
+            let line = lines[i];
+            let line_length = line.len();
+            let slice_len = min(n_cols, line_length);
+            let slice = &line[..slice_len];
 
-        for c in line.chars() {
-            if c == ' ' {
-                row.push(false)
-            } else {
-                row.push(true)
+            for c in slice.chars() {
+                if c == ' ' {
+                    row.push(false)
+                } else {
+                    row.push(true)
+                }
             }
-        }
 
-        if max_width > line_length {
-            let diff = max_width - line_length;
-            for _j in 0..diff {
+            if n_cols > line_length {
+                let diff = n_cols - line_length;
+                for _j in 0..diff {
+                    row.push(false);
+                }
+            }
+        } else {
+            for _i in 0..n_cols {
                 row.push(false);
             }
         }

@@ -11,15 +11,21 @@ pub struct Config {
 }
 
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
+    let term_dimensions = term::get_dimensions();
     let p = std::path::Path::new(&config.file_path);
-    let mut state = file::get_initial_state(p).expect("cannot get state for path");
+    let mut state = file::get_initial_state(
+        p,
+        term_dimensions.ws_row as usize,
+        term_dimensions.ws_col as usize,
+    )
+    .expect("cannot get state for path");
 
     loop {
         term::move_cursor_to_top();
         term::print_state(&state);
         io::stdout().flush().unwrap();
         turn(&mut state);
-        std::thread::sleep(std::time::Duration::from_millis(1000))
+        std::thread::sleep(std::time::Duration::from_millis(100))
     }
 }
 
