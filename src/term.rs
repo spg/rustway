@@ -1,6 +1,6 @@
 pub fn move_cursor_to_top() {
     print!("\x1B[1;1H");
-    print!("{}[2J", 27 as char);
+    print!("{}[2J", 27 as char); // clear screen
 }
 
 pub fn print_state(state: &Vec<Vec<bool>>) {
