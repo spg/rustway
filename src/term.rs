@@ -17,10 +17,10 @@ pub fn move_cursor_to_top() {
     print!("\x1B[1;1H")
 }
 
-pub fn print_state(state: &Vec<Vec<i32>>) {
+pub fn print_state(state: &Vec<Vec<bool>>) {
     for row in state {
         for cell in row {
-            let c = if cell.clone() > 0 { "*" } else { " " };
+            let c = if cell.clone() == true { "*" } else { " " };
             print!("{}", c);
         }
     }

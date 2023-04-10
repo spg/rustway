@@ -1,9 +1,4 @@
-use std::{
-    env,
-    error::Error,
-    fs,
-    path::{self, Path},
-};
+use std::{error::Error, fs, path::Path};
 
 #[cfg(test)]
 mod tests {
@@ -90,7 +85,7 @@ fn get_file_contents(path: &Path) -> Result<String, Box<dyn Error>> {
     Ok(contents)
 }
 
-fn get_initial_state(path: &Path) -> Result<Vec<Vec<bool>>, Box<dyn Error>> {
+pub fn get_initial_state(path: &Path) -> Result<Vec<Vec<bool>>, Box<dyn Error>> {
     let mut max_width = 0;
     let contents = get_file_contents(path)?;
 

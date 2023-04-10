@@ -11,40 +11,8 @@ pub struct Config {
 }
 
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
-    let w = unsafe { term::get_dimensions() };
-    let w_cells = w.ws_col as i32;
-    let h_cells = w.ws_row as i32;
-
-    let mut state = vec![vec![0; w_cells as usize]; h_cells as usize];
-
-    state[0][1] = 1;
-    state[1][3] = 1;
-    state[1][4] = 1;
-    state[2][3] = 1;
-    state[2][4] = 1;
-    state[3][3] = 1;
-
-    // beacon
-    state[20][20] = 1;
-    state[20][21] = 1;
-    state[21][20] = 1;
-    state[21][21] = 1;
-    state[22][22] = 1;
-    state[22][23] = 1;
-    state[23][22] = 1;
-    state[23][23] = 1;
-
-    // blinker
-    state[20][40] = 1;
-    state[21][40] = 1;
-    state[22][40] = 1;
-
-    // glider
-    state[50][70] = 1;
-    state[51][71] = 1;
-    state[51][72] = 1;
-    state[50][72] = 1;
-    state[49][72] = 1;
+    let p = std::path::Path::new(&config.file_path);
+    let mut state = file::get_initial_state(p).expect("cannot get state for path");
 
     loop {
         term::move_cursor_to_top();
@@ -55,10 +23,10 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     }
 }
 
-fn turn(state: &mut Vec<Vec<i32>>) {
+fn turn(state: &mut Vec<Vec<bool>>) {
     let rows = state.len() as i32;
     let cols = state[0].len() as i32;
-    let mut copy = vec![vec![0; cols as usize]; rows as usize];
+    let mut copy = vec![vec![false; cols as usize]; rows as usize];
 
     for m in 0..rows - 1 {
         for n in 0..cols - 1 {
@@ -85,21 +53,21 @@ fn turn(state: &mut Vec<Vec<i32>>) {
                 let m = v_coord[0];
                 let n = v_coord[1];
                 let v = state[m as usize][n as usize];
-                if v > 0 {
+                if v {
                     alive_n_count += 1;
                 }
             }
-            if cell > 0 {
+            if cell {
                 if alive_n_count < 2 {
-                    copy[m as usize][n as usize] = 0;
+                    copy[m as usize][n as usize] = false;
                 } else if alive_n_count > 3 {
-                    copy[m as usize][n as usize] = 0;
+                    copy[m as usize][n as usize] = false;
                 } else {
-                    copy[m as usize][n as usize] = 1;
+                    copy[m as usize][n as usize] = true;
                 }
             } else {
                 if alive_n_count == 3 {
-                    copy[m as usize][n as usize] = 1;
+                    copy[m as usize][n as usize] = true;
                 }
             }
         }
