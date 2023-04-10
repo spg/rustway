@@ -16,10 +16,10 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
 
     loop {
         term::move_cursor_to_top();
-        turn(&mut state);
         term::print_state(&state);
         io::stdout().flush().unwrap();
-        std::thread::sleep(std::time::Duration::from_millis(100))
+        turn(&mut state);
+        std::thread::sleep(std::time::Duration::from_millis(1000))
     }
 }
 
