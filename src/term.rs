@@ -16,3 +16,12 @@ pub unsafe fn get_dimensions() -> winsize {
 pub fn move_cursor_to_top() {
     print!("\x1B[1;1H")
 }
+
+pub fn print_state(state: &Vec<Vec<i32>>) {
+    for row in state {
+        for cell in row {
+            let c = if cell.clone() > 0 { "*" } else { " " };
+            print!("{}", c);
+        }
+    }
+}
