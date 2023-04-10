@@ -1,3 +1,3 @@
 - [x] full screen grid
-- [ ] random mode
+- [x] random mode
 - [ ] extract state type

@@ -1,3 +1,4 @@
+use rand;
 use std::{cmp::min, error::Error, fs, path::Path};
 
 #[cfg(test)]
@@ -5,6 +6,8 @@ mod tests {
     use std::path;
 
     use crate::file::get_initial_state;
+
+    use super::get_random_initial_state;
 
     #[test]
     fn testfile1_1() {
@@ -130,12 +133,40 @@ mod tests {
         assert_eq!(result[3][5], false);
         assert_eq!(result[3][6], false);
     }
+
+    #[test]
+    fn test_get_random_initial_state() {
+        let result = get_random_initial_state(10, 8).expect("could not get initial state");
+
+        assert_eq!(result.len(), 10);
+        for row in result {
+            assert_eq!(row.len(), 8);
+        }
+    }
 }
 
 fn get_file_contents(path: &Path) -> Result<String, Box<dyn Error>> {
     let contents = fs::read_to_string(path)?;
 
     Ok(contents)
+}
+
+pub fn get_random_initial_state(
+    n_rows: usize,
+    n_cols: usize,
+) -> Result<Vec<Vec<bool>>, Box<dyn Error>> {
+    let mut res = Vec::new();
+    for _i in 0..n_rows {
+        let mut row = Vec::new();
+
+        for _j in 0..n_cols {
+            row.push(rand::random());
+        }
+
+        res.push(row);
+    }
+
+    Ok(res)
 }
 
 pub fn get_initial_state(

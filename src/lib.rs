@@ -7,25 +7,44 @@ mod file;
 mod term;
 
 pub struct Config {
-    pub file_path: String,
+    pub file_path: Option<String>,
+    pub random: bool,
 }
 
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let term_dimensions = term::get_dimensions();
-    let p = std::path::Path::new(&config.file_path);
-    let mut state = file::get_initial_state(
-        p,
-        term_dimensions.ws_row as usize,
-        term_dimensions.ws_col as usize,
-    )
-    .expect("cannot get state for path");
+    match config.file_path {
+        Some(p) => {
+            let mut state = file::get_initial_state(
+                std::path::Path::new(&p),
+                term_dimensions.ws_row as usize,
+                term_dimensions.ws_col as usize,
+            )
+            .expect("cannot get state for path");
 
-    loop {
-        term::move_cursor_to_top();
-        term::print_state(&state);
-        io::stdout().flush().unwrap();
-        turn(&mut state);
-        std::thread::sleep(std::time::Duration::from_millis(100))
+            loop {
+                term::move_cursor_to_top();
+                term::print_state(&state);
+                io::stdout().flush().unwrap();
+                turn(&mut state);
+            }
+        }
+        None => {
+            let mut state = file::get_random_initial_state(
+                term_dimensions.ws_row as usize,
+                term_dimensions.ws_col as usize,
+            )
+            .expect("cannot get state for path");
+
+            println!("{}", state.len());
+
+            loop {
+                term::move_cursor_to_top();
+                term::print_state(&state);
+                io::stdout().flush().unwrap();
+                turn(&mut state);
+            }
+        }
     }
 }
 
